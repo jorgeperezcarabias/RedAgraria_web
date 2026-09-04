@@ -1,0 +1,76 @@
+---
+interface Props {
+  titulo: string;
+}
+const { titulo } = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{titulo} · Red Agraria</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">Red Agraria</a>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>Red Agraria — información y ayudas para el campo.</p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --tierra: #4a5d3a;
+    --tierra-oscura: #2e3b23;
+    --trigo: #c9a24b;
+    --papel: #f7f5ef;
+    --texto: #26261f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--papel);
+    color: var(--texto);
+    font-family: 'Iowan Old Style', 'Georgia', serif;
+    line-height: 1.6;
+  }
+
+  .site-header {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 2px solid var(--tierra);
+  }
+
+  .brand {
+    font-family: Georgia, serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--tierra-oscura);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+
+  main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .site-footer {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    color: #6b6b5e;
+    font-size: 0.85rem;
+  }
+
+  a { color: var(--tierra); }
+</style>

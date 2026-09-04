@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const articulos = (await getCollection('articulos')).sort(
+  (a, b) => b.data.fecha.valueOf() - a.data.fecha.valueOf()
+);
+---
+
+<Base titulo="Inicio">
+  <h1>Últimos artículos</h1>
+  <ul class="lista">
+    {articulos.map((articulo) => (
+      <li>
+        <a href={`/articulos/${articulo.id}/`}>{articulo.data.titulo}</a>
+        <p class="resumen">{articulo.data.resumen}</p>
+        <p class="meta">{articulo.data.tema} · {articulo.data.fecha.toLocaleDateString('es-ES')}</p>
+      </li>
+    ))}
+  </ul>
+</Base>
+
+<style>
+  .lista { list-style: none; padding: 0; }
+  .lista li { margin-bottom: 2rem; }
+  .lista a { font-size: 1.2rem; font-weight: 700; text-decoration: none; }
+  .resumen { margin: 0.3rem 0; color: #444; }
+  .meta { font-size: 0.8rem; color: #6b6b5e; margin: 0; }
+</style>
