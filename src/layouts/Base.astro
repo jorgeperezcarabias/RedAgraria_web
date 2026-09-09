@@ -3,6 +3,8 @@ interface Props {
   titulo: string;
 }
 const { titulo } = Astro.props;
+const rutaActual = Astro.url.pathname;
+const esInicio = rutaActual === '/';
 ---
 
 <html lang="es">
@@ -12,10 +14,25 @@ const { titulo } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{titulo} · Red Agraria</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="/">Red Agraria</a>
+      <div class="site-header__inner">
+        <a class="brand" href="/">
+          <span class="brand__mark" aria-hidden="true">🌾</span>
+          Red Agraria
+        </a>
+        <nav class="nav" aria-label="Principal">
+          <a href="/" aria-current={esInicio ? 'page' : undefined}>Inicio</a>
+        </nav>
+      </div>
     </header>
     <main>
       <slot />
@@ -28,39 +45,100 @@ const { titulo } = Astro.props;
 
 <style is:global>
   :root {
-    --tierra: #4a5d3a;
-    --tierra-oscura: #2e3b23;
-    --trigo: #c9a24b;
-    --papel: #f7f5ef;
-    --texto: #26261f;
+    --bg: #f7f8f4;
+    --surface: #ffffff;
+    --surface-muted: #eef1e9;
+    --border: #e1e4da;
+    --text: #1a1d16;
+    --text-muted: #5c6355;
+    --primary: #2f6b3f;
+    --primary-dark: #204a2c;
+    --primary-soft: #e7f0e3;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --shadow-sm: 0 1px 2px rgba(26, 29, 22, 0.06), 0 1px 1px rgba(26, 29, 22, 0.04);
+    --shadow-md: 0 8px 24px rgba(26, 29, 22, 0.09);
+    --container: 960px;
   }
 
   * { box-sizing: border-box; }
 
+  html { -webkit-text-size-adjust: 100%; }
+
   body {
     margin: 0;
-    background: var(--papel);
-    color: var(--texto);
-    font-family: 'Iowan Old Style', 'Georgia', serif;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
 
+  h1, h2, h3 {
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  h1 { font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem); }
+  h2 { font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem); }
+
+  a { color: var(--primary); }
+
   .site-header {
-    padding: 1.5rem 1.5rem 1rem;
-    border-bottom: 2px solid var(--tierra);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(247, 248, 244, 0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .site-header__inner {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
 
   .brand {
-    font-family: Georgia, serif;
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: var(--tierra-oscura);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--primary-dark);
     text-decoration: none;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
+  }
+
+  .brand__mark { font-size: 1.2rem; }
+
+  .nav { display: flex; gap: 1.5rem; }
+
+  .nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.25rem 0;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .nav a:hover { color: var(--text); }
+
+  .nav a[aria-current='page'] {
+    color: var(--primary-dark);
+    border-bottom-color: var(--primary);
   }
 
   main {
-    max-width: 680px;
+    max-width: var(--container);
     margin: 0 auto;
     padding: 2.5rem 1.5rem 4rem;
   }
@@ -68,9 +146,19 @@ const { titulo } = Astro.props;
   .site-footer {
     text-align: center;
     padding: 2rem 1.5rem;
-    color: #6b6b5e;
+    color: var(--text-muted);
     font-size: 0.85rem;
+    border-top: 1px solid var(--border);
   }
 
-  a { color: var(--tierra); }
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 480px) {
+    .site-header__inner { padding: 0.85rem 1.25rem; }
+    main { padding: 1.75rem 1.25rem 3rem; }
+  }
 </style>

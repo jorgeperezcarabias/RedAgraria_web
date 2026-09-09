@@ -9,21 +9,98 @@ const articulos = (await getCollection('articulos')).sort(
 
 <Base titulo="Inicio">
   <h1>Últimos artículos</h1>
-  <ul class="lista">
+  <p class="intro">Actualidad, subvenciones y normativa del campo, resumidas y verificadas.</p>
+
+  <ul class="grid">
     {articulos.map((articulo) => (
-      <li>
-        <a href={`/articulos/${articulo.id}/`}>{articulo.data.titulo}</a>
-        <p class="resumen">{articulo.data.resumen}</p>
-        <p class="meta">{articulo.data.tema} · {articulo.data.fecha.toLocaleDateString('es-ES')}</p>
+      <li class="card">
+        <a class="card__link" href={`/articulos/${articulo.id}/`}>
+          <span class="card__tema">{articulo.data.tema}</span>
+          <h2 class="card__titulo">{articulo.data.titulo}</h2>
+          <p class="card__resumen">{articulo.data.resumen}</p>
+          <p class="card__fecha">{articulo.data.fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+        </a>
       </li>
     ))}
   </ul>
 </Base>
 
 <style>
-  .lista { list-style: none; padding: 0; }
-  .lista li { margin-bottom: 2rem; }
-  .lista a { font-size: 1.2rem; font-weight: 700; text-decoration: none; }
-  .resumen { margin: 0.3rem 0; color: #444; }
-  .meta { font-size: 0.8rem; color: #6b6b5e; margin: 0; }
+  .intro {
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+    margin-bottom: 2.5rem;
+    font-size: 1.05rem;
+  }
+
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  .card:hover,
+  .card:focus-within {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+  }
+
+  .card__link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1.5rem;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .card__tema {
+    align-self: flex-start;
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+  }
+
+  .card__titulo {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .card__resumen {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    flex-grow: 1;
+  }
+
+  .card__fecha {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 480px) {
+    .grid { grid-template-columns: 1fr; }
+  }
 </style>
