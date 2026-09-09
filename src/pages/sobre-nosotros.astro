@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base titulo="Sobre Red Agraria">
+  <h1>Sobre Red Agraria</h1>
+  <div class="contenido">
+    <p>
+      Red Agraria reúne información para agricultores y ganaderos en España:
+      subvenciones y ayudas de la PAC, normativa, maquinaria y actualidad del
+      sector del campo.
+    </p>
+
+    <h2>Cómo se hacen los artículos</h2>
+    <p>
+      Cada tema pasa primero por un filtro de veracidad: solo se redacta si
+      aparece confirmado en al menos dos fuentes independientes y fiables
+      (medios agrarios reconocidos, o fuentes oficiales como el BOE, el
+      Ministerio de Agricultura o las comunidades autónomas). Los rumores,
+      bulos o noticias sin respaldo se descartan antes de escribir nada.
+    </p>
+    <p>
+      Ningún artículo se publica automáticamente: una persona lo revisa
+      siempre antes de que salga en la web.
+    </p>
+  </div>
+</Base>
+
+<style>
+  .contenido {
+    max-width: 680px;
+  }
+
+  .contenido p {
+    margin: 1rem 0;
+    color: var(--text-muted);
+  }
+
+  .contenido h2 {
+    margin-top: 2rem;
+    color: var(--text);
+  }
+</style>

@@ -1,0 +1,75 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const articulos = await getCollection('articulos');
+const conteos = new Map<string, number>();
+for (const articulo of articulos) {
+  conteos.set(articulo.data.tema, (conteos.get(articulo.data.tema) ?? 0) + 1);
+}
+const temas = [...conteos.entries()].sort((a, b) => b[1] - a[1]);
+---
+
+<Base titulo="Temas">
+  <h1>Temas</h1>
+  <p class="intro">Explora los artículos por categoría.</p>
+
+  <ul class="lista">
+    {temas.map(([tema, n]) => (
+      <li>
+        <a href={`/temas/${tema}/`}>
+          <span class="tema-nombre">{tema}</span>
+          <span class="tema-conteo">{n}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</Base>
+
+<style>
+  .intro {
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+    margin-bottom: 2rem;
+    font-size: 1.05rem;
+  }
+
+  .lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .lista a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-transform: capitalize;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .lista a:hover {
+    border-color: var(--primary);
+    color: var(--primary-dark);
+  }
+
+  .tema-conteo {
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+  }
+</style>

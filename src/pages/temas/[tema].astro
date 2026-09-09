@@ -1,0 +1,70 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ArticuloCard from '../../components/ArticuloCard.astro';
+
+export async function getStaticPaths() {
+  const articulos = await getCollection('articulos');
+  const temas = [...new Set(articulos.map((a) => a.data.tema))];
+
+  return temas.map((tema) => ({
+    params: { tema },
+    props: {
+      articulos: articulos
+        .filter((a) => a.data.tema === tema)
+        .sort((a, b) => b.data.fecha.valueOf() - a.data.fecha.valueOf()),
+    },
+  }));
+}
+
+const { tema } = Astro.params;
+const { articulos } = Astro.props;
+---
+
+<Base titulo={`Tema: ${tema}`}>
+  <a class="volver" href="/temas/">← Todos los temas</a>
+  <h1 class="titulo-tema">{tema}</h1>
+
+  <ul class="grid">
+    {articulos.map((articulo) => (
+      <ArticuloCard
+        id={articulo.id}
+        titulo={articulo.data.titulo}
+        resumen={articulo.data.resumen}
+        tema={articulo.data.tema}
+        fecha={articulo.data.fecha}
+      />
+    ))}
+  </ul>
+</Base>
+
+<style>
+  .volver {
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .volver:hover { color: var(--primary); }
+
+  .titulo-tema {
+    text-transform: capitalize;
+    margin: 0 0 1.5rem;
+  }
+
+  .grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>

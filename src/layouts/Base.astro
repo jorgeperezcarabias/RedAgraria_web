@@ -5,6 +5,8 @@ interface Props {
 const { titulo } = Astro.props;
 const rutaActual = Astro.url.pathname;
 const esInicio = rutaActual === '/';
+const esTemas = rutaActual.startsWith('/temas');
+const esSobre = rutaActual.startsWith('/sobre-nosotros');
 ---
 
 <html lang="es">
@@ -31,6 +33,8 @@ const esInicio = rutaActual === '/';
         </a>
         <nav class="nav" aria-label="Principal">
           <a href="/" aria-current={esInicio ? 'page' : undefined}>Inicio</a>
+          <a href="/temas/" aria-current={esTemas ? 'page' : undefined}>Temas</a>
+          <a href="/sobre-nosotros/" aria-current={esSobre ? 'page' : undefined}>Sobre</a>
         </nav>
       </div>
     </header>

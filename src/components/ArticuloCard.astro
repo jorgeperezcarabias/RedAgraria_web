@@ -1,0 +1,79 @@
+---
+interface Props {
+  id: string;
+  titulo: string;
+  resumen: string;
+  tema: string;
+  fecha: Date;
+}
+const { id, titulo, resumen, tema, fecha } = Astro.props;
+---
+
+<li class="card">
+  <a class="card__link" href={`/articulos/${id}/`}>
+    <span class="card__tema">{tema}</span>
+    <h2 class="card__titulo">{titulo}</h2>
+    <p class="card__resumen">{resumen}</p>
+    <p class="card__fecha">{fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+  </a>
+</li>
+
+<style>
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  .card:hover,
+  .card:focus-within {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+  }
+
+  .card__link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1.5rem;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .card__tema {
+    align-self: flex-start;
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+  }
+
+  .card__titulo {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+
+  .card__resumen {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    flex-grow: 1;
+  }
+
+  .card__fecha {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+</style>
