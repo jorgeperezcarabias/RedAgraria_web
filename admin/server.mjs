@@ -6,7 +6,10 @@ import { execFileSync } from 'node:child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_DIR = path.resolve(__dirname, '..');
+const BASE_DIR = path.resolve(REPO_DIR, '..');
 const ARTICULOS_DIR = path.join(REPO_DIR, 'src', 'content', 'articulos');
+const PENDIENTES_DIR = path.join(BASE_DIR, 'Pendientes');
+const LISTO_DIR = path.join(BASE_DIR, 'Listo-para-publicar');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const HOST = '127.0.0.1';
 const PORT = 4322;
@@ -54,19 +57,20 @@ function idDesdeArchivo(nombre) {
   return nombre.replace(/\.md$/, '');
 }
 
-function listarArticulos() {
-  const archivos = fs.readdirSync(ARTICULOS_DIR).filter((f) => f.endsWith('.md'));
-  const articulos = archivos.map((nombre) => {
-    const ruta = path.join(ARTICULOS_DIR, nombre);
+function listarMarkdown(dir) {
+  if (!fs.existsSync(dir)) return [];
+  const archivos = fs.readdirSync(dir).filter((f) => f.endsWith('.md'));
+  const items = archivos.map((nombre) => {
+    const ruta = path.join(dir, nombre);
     const { data } = parseFrontmatter(fs.readFileSync(ruta, 'utf-8'));
     return { id: idDesdeArchivo(nombre), ...data };
   });
-  articulos.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
-  return articulos;
+  items.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+  return items;
 }
 
-function leerArticulo(id) {
-  const ruta = path.join(ARTICULOS_DIR, `${id}.md`);
+function leerMarkdown(dir, id) {
+  const ruta = path.join(dir, `${id}.md`);
   if (!fs.existsSync(ruta)) return null;
   const { data, cuerpo } = parseFrontmatter(fs.readFileSync(ruta, 'utf-8'));
   return { id, ...data, cuerpo };
@@ -86,6 +90,8 @@ function validar(data, cuerpo) {
   }
   return null;
 }
+
+// --- Publicados (src/content/articulos/, bajo git) ---
 
 function guardarArticulo(id, data, cuerpo) {
   const error = validar(data, cuerpo);
@@ -134,6 +140,46 @@ function borrarArticulo(id) {
   return { ok: true };
 }
 
+// --- Pendientes (revisión humana, fuera de git) ---
+
+function guardarPendiente(id, data, cuerpo) {
+  const error = validar(data, cuerpo);
+  if (error) return { ok: false, error };
+
+  const ruta = path.join(PENDIENTES_DIR, `${id}.md`);
+  if (!fs.existsSync(ruta)) return { ok: false, error: 'El borrador no existe' };
+
+  fs.writeFileSync(ruta, serializarArticulo(data, cuerpo), 'utf-8');
+  return { ok: true };
+}
+
+function descartarPendiente(id) {
+  const ruta = path.join(PENDIENTES_DIR, `${id}.md`);
+  if (!fs.existsSync(ruta)) return { ok: false, error: 'El borrador no existe' };
+  fs.unlinkSync(ruta);
+  return { ok: true };
+}
+
+function aprobarPendiente(id) {
+  const origen = path.join(PENDIENTES_DIR, `${id}.md`);
+  if (!fs.existsSync(origen)) return { ok: false, error: 'El borrador no existe' };
+  fs.mkdirSync(LISTO_DIR, { recursive: true });
+  const destino = path.join(LISTO_DIR, `${id}.md`);
+  fs.renameSync(origen, destino);
+  return { ok: true };
+}
+
+// --- Listo-para-publicar (cola transitoria, la procesa el vigilante local) ---
+
+function devolverAPendientes(id) {
+  const origen = path.join(LISTO_DIR, `${id}.md`);
+  if (!fs.existsSync(origen)) return { ok: false, error: 'No está en la cola de publicación' };
+  fs.mkdirSync(PENDIENTES_DIR, { recursive: true });
+  const destino = path.join(PENDIENTES_DIR, `${id}.md`);
+  fs.renameSync(origen, destino);
+  return { ok: true };
+}
+
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -153,7 +199,7 @@ function servirEstatico(req, res) {
   res.end(fs.readFileSync(rutaCompleta));
 }
 
-function leerCuerpo(req) {
+function leerCuerpoPeticion(req) {
   return new Promise((resolve, reject) => {
     let cuerpo = '';
     req.on('data', (chunk) => (cuerpo += chunk));
@@ -176,24 +222,21 @@ function json(res, status, data) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${HOST}`);
 
+  // Publicados
   if (url.pathname === '/api/articulos' && req.method === 'GET') {
-    return json(res, 200, listarArticulos());
+    return json(res, 200, listarMarkdown(ARTICULOS_DIR));
   }
-
-  const matchUno = url.pathname.match(/^\/api\/articulos\/([^/]+)$/);
-  if (matchUno) {
-    const id = decodeURIComponent(matchUno[1]);
-
+  const matchArticulo = url.pathname.match(/^\/api\/articulos\/([^/]+)$/);
+  if (matchArticulo) {
+    const id = decodeURIComponent(matchArticulo[1]);
     if (req.method === 'GET') {
-      const articulo = leerArticulo(id);
-      if (!articulo) return json(res, 404, { error: 'No encontrado' });
-      return json(res, 200, articulo);
+      const articulo = leerMarkdown(ARTICULOS_DIR, id);
+      return articulo ? json(res, 200, articulo) : json(res, 404, { error: 'No encontrado' });
     }
-
     if (req.method === 'PUT') {
       let body;
       try {
-        body = await leerCuerpo(req);
+        body = await leerCuerpoPeticion(req);
       } catch {
         return json(res, 400, { error: 'JSON inválido' });
       }
@@ -201,11 +244,53 @@ const server = http.createServer(async (req, res) => {
       const resultado = guardarArticulo(id, data, cuerpo || '');
       return json(res, resultado.ok ? 200 : 400, resultado);
     }
-
     if (req.method === 'DELETE') {
       const resultado = borrarArticulo(id);
       return json(res, resultado.ok ? 200 : 400, resultado);
     }
+  }
+
+  // Pendientes
+  if (url.pathname === '/api/pendientes' && req.method === 'GET') {
+    return json(res, 200, listarMarkdown(PENDIENTES_DIR));
+  }
+  const matchAprobar = url.pathname.match(/^\/api\/pendientes\/([^/]+)\/aprobar$/);
+  if (matchAprobar && req.method === 'POST') {
+    const resultado = aprobarPendiente(decodeURIComponent(matchAprobar[1]));
+    return json(res, resultado.ok ? 200 : 400, resultado);
+  }
+  const matchPendiente = url.pathname.match(/^\/api\/pendientes\/([^/]+)$/);
+  if (matchPendiente) {
+    const id = decodeURIComponent(matchPendiente[1]);
+    if (req.method === 'GET') {
+      const borrador = leerMarkdown(PENDIENTES_DIR, id);
+      return borrador ? json(res, 200, borrador) : json(res, 404, { error: 'No encontrado' });
+    }
+    if (req.method === 'PUT') {
+      let body;
+      try {
+        body = await leerCuerpoPeticion(req);
+      } catch {
+        return json(res, 400, { error: 'JSON inválido' });
+      }
+      const { cuerpo, ...data } = body;
+      const resultado = guardarPendiente(id, data, cuerpo || '');
+      return json(res, resultado.ok ? 200 : 400, resultado);
+    }
+    if (req.method === 'DELETE') {
+      const resultado = descartarPendiente(id);
+      return json(res, resultado.ok ? 200 : 400, resultado);
+    }
+  }
+
+  // Listo-para-publicar
+  if (url.pathname === '/api/listo' && req.method === 'GET') {
+    return json(res, 200, listarMarkdown(LISTO_DIR));
+  }
+  const matchDevolver = url.pathname.match(/^\/api\/listo\/([^/]+)\/devolver$/);
+  if (matchDevolver && req.method === 'POST') {
+    const resultado = devolverAPendientes(decodeURIComponent(matchDevolver[1]));
+    return json(res, resultado.ok ? 200 : 400, resultado);
   }
 
   if (req.method === 'GET') return servirEstatico(req, res);

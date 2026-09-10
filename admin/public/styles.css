@@ -47,11 +47,46 @@ body {
   border-radius: 999px;
 }
 
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.tab {
+  border: none;
+  background: none;
+  padding: 0.6rem 0.2rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  margin-right: 1rem;
+}
+
+.tab:hover { color: var(--text); border-color: var(--border); }
+
+.tab.activa { color: var(--primary-dark); border-color: var(--primary); }
+
 main {
   max-width: 760px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
 }
+
+.controles {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.controles #buscar { flex: 1 1 240px; }
+.controles #filtro-tema { flex: 0 0 auto; }
 
 .cargando { color: var(--text-muted); }
 
@@ -155,10 +190,37 @@ input:focus, textarea:focus {
   outline-offset: -1px;
 }
 
-textarea.cuerpo { min-height: 320px; font-family: ui-monospace, monospace; font-size: 0.9rem; }
 textarea.resumen { min-height: 70px; }
 
-.acciones-form { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+#editor-cuerpo {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+
+#editor-cuerpo .ql-toolbar {
+  border-color: var(--border);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+#editor-cuerpo .ql-container {
+  border-color: var(--border);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1rem;
+}
+
+#editor-cuerpo .ql-editor { min-height: 320px; }
+
+.nota-fuentes {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius-sm);
+  margin: -0.5rem 0 0;
+}
+
+.acciones-form { display: flex; gap: 0.75rem; margin-top: 0.5rem; flex-wrap: wrap; }
 
 .mensaje {
   padding: 0.75rem 1rem;
