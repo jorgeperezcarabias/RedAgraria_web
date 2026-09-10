@@ -211,6 +211,8 @@ textarea.resumen { min-height: 70px; }
 
 #editor-cuerpo .ql-editor { min-height: 320px; }
 
+.cuerpo-fallback { min-height: 320px; font-family: ui-monospace, monospace; font-size: 0.9rem; }
+
 .nota-fuentes {
   font-size: 0.85rem;
   color: var(--text-muted);

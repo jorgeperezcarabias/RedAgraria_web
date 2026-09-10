@@ -132,7 +132,7 @@ function renderFilas() {
     `;
     ul.appendChild(li);
   }
-  contenedor.appendChild(ul);
+  contenedor.replaceChildren(ul);
 }
 
 function accionesPara(id) {
@@ -256,28 +256,51 @@ async function vistaEditar(tipo, id) {
     </form>
   `;
 
-  quill = new Quill('#editor-cuerpo', {
-    theme: 'snow',
-    modules: {
-      toolbar: [
-        [{ header: [2, 3, false] }],
-        ['bold', 'italic', 'link'],
-        ['blockquote', 'code-block'],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        ['clean'],
-      ],
-    },
-  });
-  quill.root.innerHTML = marked.parse(cuerpoSinFuentes || '');
-
+  // Enlazar volver/cancelar ANTES de tocar el editor visual: si Quill falla
+  // al cargar (red, CDN…), estos botones deben seguir funcionando igual.
   document.getElementById('volver').addEventListener('click', vistaLista);
   document.getElementById('cancelar').addEventListener('click', vistaLista);
+
+  quill = null;
+  try {
+    quill = new Quill('#editor-cuerpo', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          [{ header: [2, 3, false] }],
+          ['bold', 'italic', 'link'],
+          ['blockquote', 'code-block'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['clean'],
+        ],
+      },
+    });
+    quill.root.innerHTML = marked.parse(cuerpoSinFuentes || '');
+    // Los botones de la barra de Quill no llevan type="button": al estar
+    // dentro de <form>, sin esto cualquier clic en la barra (negrita,
+    // títulos…) enviaría el formulario en vez de aplicar el formato.
+    document.querySelectorAll('#editor-cuerpo button').forEach((b) => {
+      if (!b.getAttribute('type')) b.setAttribute('type', 'button');
+    });
+  } catch (e) {
+    quill = null;
+    document.getElementById('editor-cuerpo').outerHTML =
+      `<textarea name="cuerpo" class="cuerpo-fallback" required>${escapeHtml(cuerpoSinFuentes)}</textarea>`;
+    document.getElementById('form-editar').prepend(
+      mensaje(`No se pudo cargar el editor visual, se usa texto plano (Markdown) en su lugar: ${e.message}`, 'error')
+    );
+  }
 
   function recogerDatos() {
     const form = document.getElementById('form-editar');
     const datos = Object.fromEntries(new FormData(form).entries());
-    const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
-    const cuerpoMd = turndownService.turndown(quill.root.innerHTML);
+    let cuerpoMd;
+    if (quill) {
+      const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+      cuerpoMd = turndownService.turndown(quill.root.innerHTML);
+    } else {
+      cuerpoMd = datos.cuerpo || '';
+    }
     datos.cuerpo = reinsertarFuentes(cuerpoMd, fuentesActuales);
     return datos;
   }
