@@ -242,8 +242,8 @@ const MIME = {
   '.css': 'text/css; charset=utf-8',
 };
 
-function servirEstatico(req, res) {
-  let ruta = req.url === '/' ? '/index.html' : req.url;
+function servirEstatico(req, res, pathname) {
+  const ruta = pathname === '/' ? '/index.html' : pathname;
   const rutaCompleta = path.join(PUBLIC_DIR, path.normalize(ruta));
   if (!rutaCompleta.startsWith(PUBLIC_DIR) || !fs.existsSync(rutaCompleta)) {
     res.writeHead(404);
@@ -364,7 +364,7 @@ const server = http.createServer(async (req, res) => {
     return json(res, resultado.ok ? 200 : 400, resultado);
   }
 
-  if (req.method === 'GET') return servirEstatico(req, res);
+  if (req.method === 'GET') return servirEstatico(req, res, url.pathname);
 
   res.writeHead(404);
   res.end('No encontrado');

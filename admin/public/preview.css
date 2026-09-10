@@ -1,0 +1,119 @@
+/* Copiado de src/layouts/Base.astro y src/pages/articulos/[id].astro,
+   para que la vista previa se parezca lo más posible a la web real. */
+
+:root {
+  --bg: #f7f8f4;
+  --surface: #ffffff;
+  --surface-muted: #eef1e9;
+  --border: #e1e4da;
+  --text: #1a1d16;
+  --text-muted: #5c6355;
+  --primary: #2f6b3f;
+  --primary-dark: #204a2c;
+  --primary-soft: #e7f0e3;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --container: 960px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+h1 { font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem); }
+h2 { font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem); }
+
+a { color: var(--primary); }
+
+.aviso-previa {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.5rem;
+  background: #fdf1d8;
+  border-bottom: 1px solid #e8cf9a;
+  font-weight: 800;
+  color: #204a2c;
+}
+
+.badge-previa {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8a6116;
+  background: #fff;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+
+main {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.cargando { color: var(--text-muted); }
+
+.articulo {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.tema {
+  display: inline-block;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  margin: 0 0 0.75rem;
+}
+
+h1 { margin: 0 0 0.5rem; }
+
+.fecha {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0 0 1.5rem;
+}
+
+.imagen-destacada {
+  width: 100%;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+}
+
+.cuerpo { font-size: 1.05rem; }
+.cuerpo p { margin: 1rem 0; }
+.cuerpo h2 { margin-top: 2rem; }
+
+.mensaje.error {
+  background: #fbe9e7;
+  color: #b3261e;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  max-width: 680px;
+  margin: 0 auto;
+}

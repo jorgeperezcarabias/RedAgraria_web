@@ -193,19 +193,28 @@ function accionesPara(id) {
   }
   if (pestanaActual === 'pendientes') {
     return `
+      ${enlaceVistaPrevia(pestanaActual, id)}
       <button data-accion="editar" ${idAttr}>Editar</button>
       <button data-accion="aprobar" class="primario" ${idAttr}>Aprobar y publicar</button>
       <button data-accion="descartar" class="peligro" ${idAttr}>Descartar</button>
     `;
   }
   if (pestanaActual === 'listo') {
-    return `<button data-accion="devolver" ${idAttr}>Devolver a Pendientes</button>`;
+    return `
+      ${enlaceVistaPrevia(pestanaActual, id)}
+      <button data-accion="devolver" ${idAttr}>Devolver a Pendientes</button>
+    `;
   }
   // papelera
   return `
+    ${enlaceVistaPrevia(pestanaActual, id)}
     <button data-accion="restaurar" class="primario" ${idAttr}>Restaurar</button>
     <button data-accion="borrar-definitivo" class="peligro" ${idAttr}>Borrar definitivamente</button>
   `;
+}
+
+function enlaceVistaPrevia(tipo, id) {
+  return `<a href="/preview.html?tipo=${encodeURIComponent(tipo)}&id=${encodeURIComponent(id)}" target="_blank" rel="noopener" class="enlace-ver">Vista previa ↗</a>`;
 }
 
 async function manejarAccion(ev) {
@@ -310,6 +319,7 @@ async function vistaEditar(tipo, id) {
     <div class="barra-edicion">
       <button class="volver" type="button" id="volver">← Volver a la lista</button>
       ${tipo === 'articulos' ? `<a href="${SITIO_URL}/articulos/${escapeHtml(id)}/" target="_blank" rel="noopener" class="enlace-ver-web">Ver en la web ↗</a>` : ''}
+      ${tipo === 'pendientes' ? `<a href="/preview.html?tipo=${encodeURIComponent(tipo)}&id=${encodeURIComponent(id)}" target="_blank" rel="noopener" class="enlace-ver-web">Vista previa ↗</a>` : ''}
     </div>
     <h1>Editar</h1>
     <form id="form-editar">
