@@ -20,6 +20,7 @@ const { Content } = await render(articulo);
     <p class="tema">{articulo.data.tema}</p>
     <h1>{articulo.data.titulo}</h1>
     <p class="fecha">{articulo.data.fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+    {articulo.data.imagen && <img class="imagen-destacada" src={articulo.data.imagen} alt="" />}
     <div class="cuerpo">
       <Content />
     </div>
@@ -61,7 +62,13 @@ const { Content } = await render(articulo);
   .fecha {
     color: var(--text-muted);
     font-size: 0.9rem;
-    margin: 0 0 2rem;
+    margin: 0 0 1.5rem;
+  }
+
+  .imagen-destacada {
+    width: 100%;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
   }
 
   .cuerpo { font-size: 1.05rem; }

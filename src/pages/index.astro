@@ -20,6 +20,7 @@ const articulos = (await getCollection('articulos')).sort(
         resumen={articulo.data.resumen}
         tema={articulo.data.tema}
         fecha={articulo.data.fecha}
+        imagen={articulo.data.imagen}
       />
     ))}
   </ul>

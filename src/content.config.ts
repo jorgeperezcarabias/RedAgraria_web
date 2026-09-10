@@ -8,6 +8,7 @@ const articulos = defineCollection({
     resumen: z.string(),
     fecha: z.coerce.date(),
     tema: z.string(), // ej: "subvenciones", "maquinaria", "ganaderia"
+    imagen: z.string().url().optional(), // URL de imagen destacada, opcional
   }),
 });
 

@@ -41,17 +41,18 @@ function parseFrontmatter(texto) {
 
 function serializarArticulo(data, cuerpo) {
   const escapar = (s) => String(s).replace(/"/g, '\\"');
-  return [
+  const lineas = [
     '---',
     `titulo: "${escapar(data.titulo)}"`,
     `resumen: "${escapar(data.resumen)}"`,
     `fecha: ${data.fecha}`,
     `tema: ${data.tema}`,
-    '---',
-    '',
-    cuerpo.trim(),
-    '',
-  ].join('\n');
+  ];
+  if (data.imagen && data.imagen.trim()) {
+    lineas.push(`imagen: "${escapar(data.imagen.trim())}"`);
+  }
+  lineas.push('---', '', cuerpo.trim(), '');
+  return lineas.join('\n');
 }
 
 function idDesdeArchivo(nombre) {
@@ -88,6 +89,9 @@ function validar(data, cuerpo) {
   }
   if (!cuerpo || !cuerpo.trim()) {
     return 'El cuerpo del artículo no puede estar vacío';
+  }
+  if (data.imagen && data.imagen.trim() && !/^https?:\/\//.test(data.imagen.trim())) {
+    return 'La imagen debe ser una URL (empezar por http:// o https://)';
   }
   return null;
 }

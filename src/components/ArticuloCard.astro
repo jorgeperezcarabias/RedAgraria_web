@@ -5,12 +5,14 @@ interface Props {
   resumen: string;
   tema: string;
   fecha: Date;
+  imagen?: string;
 }
-const { id, titulo, resumen, tema, fecha } = Astro.props;
+const { id, titulo, resumen, tema, fecha, imagen } = Astro.props;
 ---
 
 <li class="card">
   <a class="card__link" href={`/articulos/${id}/`}>
+    {imagen && <img class="card__imagen" src={imagen} alt="" loading="lazy" />}
     <span class="card__tema">{tema}</span>
     <h2 class="card__titulo">{titulo}</h2>
     <p class="card__resumen">{resumen}</p>
@@ -24,6 +26,7 @@ const { id, titulo, resumen, tema, fecha } = Astro.props;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
+    overflow: hidden;
     transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   }
 
@@ -32,6 +35,13 @@ const { id, titulo, resumen, tema, fecha } = Astro.props;
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
     border-color: var(--primary);
+  }
+
+  .card__imagen {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
   }
 
   .card__link {

@@ -129,6 +129,7 @@ function renderFilas() {
     const li = document.createElement('li');
     li.className = 'fila';
     li.innerHTML = `
+      ${item.imagen ? `<img class="fila__imagen" src="${escapeHtml(item.imagen)}" alt="" />` : ''}
       <div class="fila__info">
         <span class="fila__tema">${escapeHtml(item.tema)}</span>
         <div class="fila__titulo">${escapeHtml(item.titulo)}</div>
@@ -279,6 +280,11 @@ async function vistaEditar(tipo, id) {
       <label>Fecha
         <input type="date" name="fecha" value="${escapeHtml(articulo.fecha)}" required />
       </label>
+      <label>Imagen destacada (opcional)
+        <input type="url" name="imagen" id="campo-imagen" placeholder="https://…" value="${escapeHtml(articulo.imagen || '')}" />
+      </label>
+      ${articulo.imagen ? '<p class="nota-fuentes">Imagen encontrada automáticamente en la fuente original de la noticia — puedes cambiarla o borrar el campo para quitarla.</p>' : ''}
+      <div id="vista-previa-imagen" class="vista-previa-imagen">${articulo.imagen ? `<img src="${escapeHtml(articulo.imagen)}" alt="" />` : ''}</div>
       <label>Cuerpo
         <div id="editor-cuerpo"></div>
       </label>
@@ -296,6 +302,12 @@ async function vistaEditar(tipo, id) {
   document.getElementById('volver').addEventListener('click', vistaLista);
   document.getElementById('cancelar').addEventListener('click', vistaLista);
 
+  document.getElementById('campo-imagen').addEventListener('input', (ev) => {
+    const url = ev.target.value.trim();
+    const vista = document.getElementById('vista-previa-imagen');
+    vista.innerHTML = url ? `<img src="${escapeHtml(url)}" alt="" />` : '';
+  });
+
   quill = null;
   try {
     quill = new Quill('#editor-cuerpo', {
@@ -306,6 +318,7 @@ async function vistaEditar(tipo, id) {
           ['bold', 'italic', 'link'],
           ['blockquote', 'code-block'],
           [{ list: 'ordered' }, { list: 'bullet' }],
+          ['image'],
           ['clean'],
         ],
       },
