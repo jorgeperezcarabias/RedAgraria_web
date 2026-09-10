@@ -8,6 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_DIR = path.resolve(__dirname, '..');
 const BASE_DIR = path.resolve(REPO_DIR, '..');
 const ARTICULOS_DIR = path.join(REPO_DIR, 'src', 'content', 'articulos');
+const PAPELERA_DIR = path.join(REPO_DIR, '_papelera');
 const PENDIENTES_DIR = path.join(BASE_DIR, 'Pendientes');
 const LISTO_DIR = path.join(BASE_DIR, 'Listo-para-publicar');
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -129,12 +130,63 @@ function borrarArticulo(id) {
     return { ok: false, error: `No se pudo sincronizar con GitHub antes de borrar: ${e.message}` };
   }
 
+  fs.mkdirSync(PAPELERA_DIR, { recursive: true });
+  fs.renameSync(ruta, path.join(PAPELERA_DIR, `${id}.md`));
+
   try {
-    git(['rm', `src/content/articulos/${id}.md`]);
-    git(['commit', '-m', `Eliminar artículo: ${id}.md`]);
+    git(['add', `src/content/articulos/${id}.md`]);
+    git(['add', `_papelera/${id}.md`]);
+    git(['commit', '-m', `Eliminar artículo (a papelera): ${id}.md`]);
     git(['push', 'origin', 'main']);
   } catch (e) {
-    return { ok: false, error: `Falló el borrado/commit/push: ${e.message}` };
+    return { ok: false, error: `Movido a la papelera en local pero falló commit/push: ${e.message}` };
+  }
+
+  return { ok: true };
+}
+
+// --- Papelera (artículos quitados de la web, recuperables) ---
+
+function restaurarDePapelera(id) {
+  const origen = path.join(PAPELERA_DIR, `${id}.md`);
+  if (!fs.existsSync(origen)) return { ok: false, error: 'No está en la papelera' };
+
+  try {
+    git(['pull', '--ff-only', 'origin', 'main']);
+  } catch (e) {
+    return { ok: false, error: `No se pudo sincronizar con GitHub antes de restaurar: ${e.message}` };
+  }
+
+  fs.renameSync(origen, path.join(ARTICULOS_DIR, `${id}.md`));
+
+  try {
+    git(['add', `_papelera/${id}.md`]);
+    git(['add', `src/content/articulos/${id}.md`]);
+    git(['commit', '-m', `Restaurar artículo: ${id}.md`]);
+    git(['push', 'origin', 'main']);
+  } catch (e) {
+    return { ok: false, error: `Restaurado en local pero falló commit/push: ${e.message}` };
+  }
+
+  return { ok: true };
+}
+
+function borrarDefinitivoDePapelera(id) {
+  const ruta = path.join(PAPELERA_DIR, `${id}.md`);
+  if (!fs.existsSync(ruta)) return { ok: false, error: 'No está en la papelera' };
+
+  try {
+    git(['pull', '--ff-only', 'origin', 'main']);
+  } catch (e) {
+    return { ok: false, error: `No se pudo sincronizar con GitHub antes de borrar: ${e.message}` };
+  }
+
+  try {
+    git(['rm', `_papelera/${id}.md`]);
+    git(['commit', '-m', `Borrar definitivamente: ${id}.md`]);
+    git(['push', 'origin', 'main']);
+  } catch (e) {
+    return { ok: false, error: `Falló el borrado definitivo: ${e.message}` };
   }
 
   return { ok: true };
@@ -290,6 +342,21 @@ const server = http.createServer(async (req, res) => {
   const matchDevolver = url.pathname.match(/^\/api\/listo\/([^/]+)\/devolver$/);
   if (matchDevolver && req.method === 'POST') {
     const resultado = devolverAPendientes(decodeURIComponent(matchDevolver[1]));
+    return json(res, resultado.ok ? 200 : 400, resultado);
+  }
+
+  // Papelera
+  if (url.pathname === '/api/papelera' && req.method === 'GET') {
+    return json(res, 200, listarMarkdown(PAPELERA_DIR));
+  }
+  const matchRestaurar = url.pathname.match(/^\/api\/papelera\/([^/]+)\/restaurar$/);
+  if (matchRestaurar && req.method === 'POST') {
+    const resultado = restaurarDePapelera(decodeURIComponent(matchRestaurar[1]));
+    return json(res, resultado.ok ? 200 : 400, resultado);
+  }
+  const matchPapelera = url.pathname.match(/^\/api\/papelera\/([^/]+)$/);
+  if (matchPapelera && req.method === 'DELETE') {
+    const resultado = borrarDefinitivoDePapelera(decodeURIComponent(matchPapelera[1]));
     return json(res, resultado.ok ? 200 : 400, resultado);
   }
 

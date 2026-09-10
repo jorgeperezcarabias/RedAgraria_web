@@ -14,17 +14,25 @@ este Mac (no requiere login) — el servidor no escucha en la red.
 ## Pestañas
 
 - **Publicados** — los artículos ya en la web (`src/content/articulos/`).
-  Editar o borrar hace `git pull` → escribe/borra el archivo → `commit` +
-  `push` a `main`. El despliegue se dispara solo, igual que el resto del
-  sistema.
+  Editar hace `git pull` → escribe el archivo → `commit` + `push` a
+  `main`. Borrar **no es definitivo**: mueve el archivo a `_papelera/`
+  (también en `main`, fuera de `src/content/`, así que no se ve en la
+  web) y publica ese cambio. El despliegue se dispara solo, igual que el
+  resto del sistema.
 - **Pendientes** — los borradores en revisión (`Pendientes/`, fuera del
   repo). Editar guarda el archivo sin más (no hay git de por medio).
   "Aprobar y publicar" lo mueve a `Listo-para-publicar/`; desde ahí lo
   recoge el vigilante local (`launchd`) y lo publica solo, normalmente en
-  segundos. "Descartar" lo borra sin posibilidad de deshacer.
+  segundos. "Descartar" lo borra sin posibilidad de deshacer (a
+  diferencia de Publicados, aquí sí es inmediato — son borradores sin
+  revisar, no artículos que hayan llegado a publicarse).
 - **Listo para publicar** — la cola transitoria justo antes de publicarse.
   Normalmente debería estar vacía o vaciarse sola muy rápido. Si algo se
   queda atascado ahí, "Devolver a Pendientes" lo saca de la cola.
+- **Papelera** — artículos quitados de Publicados. "Restaurar" los
+  vuelve a poner en la web (commit + push). "Borrar definitivamente" los
+  quita de la papelera para siempre — sin confirmación de por medio más
+  allá del propio aviso, no hay vuelta atrás.
 
 ## Buscador y filtro
 

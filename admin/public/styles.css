@@ -209,7 +209,20 @@ textarea.resumen { min-height: 70px; }
   font-size: 1rem;
 }
 
-#editor-cuerpo .ql-editor { min-height: 320px; }
+#editor-cuerpo .ql-editor { min-height: 320px; font-weight: 400; }
+
+/* Peso explícito: sin esto, la fuente de reserva mientras carga Inter
+   puede hacer que el texto normal ya parezca "grueso" y la negrita real
+   no se note por contraste. */
+#editor-cuerpo .ql-editor strong,
+#editor-cuerpo .ql-editor b {
+  font-weight: 700;
+}
+
+#editor-cuerpo .ql-editor h2,
+#editor-cuerpo .ql-editor h3 {
+  font-weight: 800;
+}
 
 .cuerpo-fallback { min-height: 320px; font-family: ui-monospace, monospace; font-size: 0.9rem; }
 

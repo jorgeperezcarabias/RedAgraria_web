@@ -1,11 +1,17 @@
 const app = document.getElementById('app');
 const tabsEl = document.getElementById('tabs');
 
-const ENDPOINTS = { articulos: '/api/articulos', pendientes: '/api/pendientes', listo: '/api/listo' };
+const ENDPOINTS = {
+  articulos: '/api/articulos',
+  pendientes: '/api/pendientes',
+  listo: '/api/listo',
+  papelera: '/api/papelera',
+};
 const TITULOS_TAB = {
   articulos: 'Artículos publicados',
   pendientes: 'Borradores pendientes de revisión',
   listo: 'Cola de publicación (se procesa sola, normalmente en segundos)',
+  papelera: 'Papelera — artículos quitados de la web, recuperables',
 };
 
 let pestanaActual = 'articulos';
@@ -150,8 +156,14 @@ function accionesPara(id) {
       <button data-accion="descartar" class="peligro" ${idAttr}>Descartar</button>
     `;
   }
-  // listo
-  return `<button data-accion="devolver" ${idAttr}>Devolver a Pendientes</button>`;
+  if (pestanaActual === 'listo') {
+    return `<button data-accion="devolver" ${idAttr}>Devolver a Pendientes</button>`;
+  }
+  // papelera
+  return `
+    <button data-accion="restaurar" class="primario" ${idAttr}>Restaurar</button>
+    <button data-accion="borrar-definitivo" class="peligro" ${idAttr}>Borrar definitivamente</button>
+  `;
 }
 
 async function manejarAccion(ev) {
@@ -163,11 +175,34 @@ async function manejarAccion(ev) {
   if (accion === 'editar') return vistaEditar(pestanaActual, id);
 
   if (accion === 'borrar') {
-    if (!confirm(`¿Borrar "${id}"? Esto hace push a GitHub y lo quita de la web publicada.`)) return;
+    if (!confirm(`¿Quitar "${id}" de la web? Se moverá a la Papelera (no se pierde) y se despliega el cambio.`)) return;
     try {
       await api(`/api/articulos/${encodeURIComponent(id)}`, { method: 'DELETE' });
       await vistaLista();
-      app.prepend(mensaje('Artículo borrado y publicado el cambio.', 'exito'));
+      app.prepend(mensaje('Movido a la Papelera y quitado de la web.', 'exito'));
+    } catch (e) {
+      app.prepend(mensaje(`No se pudo borrar: ${e.message}`, 'error'));
+    }
+    return;
+  }
+
+  if (accion === 'restaurar') {
+    try {
+      await api(`/api/papelera/${encodeURIComponent(id)}/restaurar`, { method: 'POST' });
+      await vistaLista();
+      app.prepend(mensaje('Restaurado y publicado de nuevo.', 'exito'));
+    } catch (e) {
+      app.prepend(mensaje(`No se pudo restaurar: ${e.message}`, 'error'));
+    }
+    return;
+  }
+
+  if (accion === 'borrar-definitivo') {
+    if (!confirm(`¿Borrar "${id}" definitivamente? Esta vez no hay papelera ni vuelta atrás.`)) return;
+    try {
+      await api(`/api/papelera/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      await vistaLista();
+      app.prepend(mensaje('Borrado definitivamente.', 'exito'));
     } catch (e) {
       app.prepend(mensaje(`No se pudo borrar: ${e.message}`, 'error'));
     }
