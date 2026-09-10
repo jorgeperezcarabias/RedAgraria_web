@@ -165,9 +165,17 @@ button.peligro:hover { border-color: var(--danger); background: var(--danger-sof
 
 button:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.barra-edicion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
 .volver {
   display: inline-block;
-  margin-bottom: 1.5rem;
   color: var(--text-muted);
   text-decoration: none;
   font-weight: 600;
@@ -178,6 +186,26 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
 .volver:hover { color: var(--primary); }
+
+a.enlace-ver,
+a.enlace-ver-web {
+  display: inline-block;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.5rem 0.9rem;
+  text-decoration: none;
+}
+
+a.enlace-ver:hover,
+a.enlace-ver-web:hover {
+  border-color: var(--primary);
+  color: var(--primary-dark);
+}
 
 form { display: flex; flex-direction: column; gap: 1rem; }
 

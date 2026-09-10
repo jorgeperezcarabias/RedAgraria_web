@@ -1,6 +1,8 @@
 const app = document.getElementById('app');
 const tabsEl = document.getElementById('tabs');
 
+const SITIO_URL = 'https://red-agraria.es';
+
 const ENDPOINTS = {
   articulos: '/api/articulos',
   pendientes: '/api/pendientes',
@@ -18,6 +20,40 @@ let pestanaActual = 'articulos';
 let cacheLista = [];
 let filtroTexto = '';
 let filtroTema = '';
+let sucio = false;
+
+window.addEventListener('beforeunload', (ev) => {
+  if (!sucio) return;
+  ev.preventDefault();
+  ev.returnValue = '';
+});
+
+// Si hay cambios sin guardar en el formulario de edición, pregunta antes de
+// navegar (volver, cancelar, cambiar de pestaña...). `continuar` es lo que
+// se ejecuta si se puede seguir (no había cambios, se guardaron, o se
+// descartan a propósito).
+async function intentarSalir(continuar) {
+  if (!sucio) return continuar();
+
+  const guardar = confirm(
+    'Tienes cambios sin guardar en este artículo.\n\nAceptar = guardarlos ahora.\nCancelar = elegir qué hacer.'
+  );
+  if (guardar) {
+    if (typeof guardarFormularioActual === 'function') {
+      const ok = await guardarFormularioActual({ navegar: false });
+      if (ok) continuar();
+    }
+    return;
+  }
+
+  const descartar = confirm('¿Salir sin guardar los cambios?');
+  if (descartar) {
+    sucio = false;
+    continuar();
+  }
+}
+
+let guardarFormularioActual = null;
 
 function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({
@@ -57,16 +93,20 @@ function reinsertarFuentes(cuerpoMd, fuentes) {
 tabsEl.addEventListener('click', (ev) => {
   const boton = ev.target.closest('button[data-tab]');
   if (!boton) return;
-  pestanaActual = boton.dataset.tab;
-  filtroTexto = '';
-  filtroTema = '';
-  for (const b of tabsEl.querySelectorAll('.tab')) b.classList.toggle('activa', b === boton);
-  vistaLista();
+  intentarSalir(() => {
+    pestanaActual = boton.dataset.tab;
+    filtroTexto = '';
+    filtroTema = '';
+    for (const b of tabsEl.querySelectorAll('.tab')) b.classList.toggle('activa', b === boton);
+    vistaLista();
+  });
 });
 
 // --- Vista lista (con buscador + filtro por tema) ---
 
 async function vistaLista() {
+  sucio = false;
+  guardarFormularioActual = null;
   app.innerHTML = '<p class="cargando">Cargando…</p>';
   try {
     cacheLista = await api(ENDPOINTS[pestanaActual]);
@@ -146,6 +186,7 @@ function accionesPara(id) {
   const idAttr = `data-id="${escapeHtml(id)}"`;
   if (pestanaActual === 'articulos') {
     return `
+      <a href="${SITIO_URL}/articulos/${encodeURIComponent(id)}/" target="_blank" rel="noopener" class="enlace-ver">Ver en la web ↗</a>
       <button data-accion="editar" ${idAttr}>Editar</button>
       <button data-accion="borrar" class="peligro" ${idAttr}>Borrar</button>
     `;
@@ -263,9 +304,13 @@ async function vistaEditar(tipo, id) {
 
   const { cuerpo: cuerpoSinFuentes, fuentes } = extraerFuentes(articulo.cuerpo || '');
   fuentesActuales = fuentes;
+  sucio = false;
 
   app.innerHTML = `
-    <button class="volver" type="button" id="volver">← Volver a la lista</button>
+    <div class="barra-edicion">
+      <button class="volver" type="button" id="volver">← Volver a la lista</button>
+      ${tipo === 'articulos' ? `<a href="${SITIO_URL}/articulos/${escapeHtml(id)}/" target="_blank" rel="noopener" class="enlace-ver-web">Ver en la web ↗</a>` : ''}
+    </div>
     <h1>Editar</h1>
     <form id="form-editar">
       <label>Título
@@ -299,8 +344,12 @@ async function vistaEditar(tipo, id) {
 
   // Enlazar volver/cancelar ANTES de tocar el editor visual: si Quill falla
   // al cargar (red, CDN…), estos botones deben seguir funcionando igual.
-  document.getElementById('volver').addEventListener('click', vistaLista);
-  document.getElementById('cancelar').addEventListener('click', vistaLista);
+  document.getElementById('volver').addEventListener('click', () => intentarSalir(vistaLista));
+  document.getElementById('cancelar').addEventListener('click', () => intentarSalir(vistaLista));
+
+  document.getElementById('form-editar').addEventListener('input', () => {
+    sucio = true;
+  });
 
   document.getElementById('campo-imagen').addEventListener('input', (ev) => {
     const url = ev.target.value.trim();
@@ -330,6 +379,9 @@ async function vistaEditar(tipo, id) {
     document.querySelectorAll('#editor-cuerpo button').forEach((b) => {
       if (!b.getAttribute('type')) b.setAttribute('type', 'button');
     });
+    quill.on('text-change', (delta, oldDelta, source) => {
+      if (source === 'user') sucio = true;
+    });
   } catch (e) {
     quill = null;
     document.getElementById('editor-cuerpo').outerHTML =
@@ -353,9 +405,8 @@ async function vistaEditar(tipo, id) {
     return datos;
   }
 
-  document.getElementById('form-editar').addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    const boton = ev.submitter;
+  async function guardarFormulario({ navegar = true } = {}) {
+    const boton = document.querySelector('#form-editar button[type="submit"]');
     const textoOriginal = boton.textContent;
     boton.disabled = true;
     boton.textContent = 'Guardando…';
@@ -363,13 +414,24 @@ async function vistaEditar(tipo, id) {
     try {
       const datos = recogerDatos();
       await api(`/api/${tipo}/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(datos) });
-      await vistaLista();
-      app.prepend(mensaje('Guardado correctamente.', 'exito'));
+      sucio = false;
+      if (navegar) {
+        await vistaLista();
+        app.prepend(mensaje('Guardado correctamente.', 'exito'));
+      }
+      return true;
     } catch (e) {
       boton.disabled = false;
       boton.textContent = textoOriginal;
       document.getElementById('form-editar').prepend(mensaje(`No se pudo guardar: ${e.message}`, 'error'));
+      return false;
     }
+  }
+  guardarFormularioActual = guardarFormulario;
+
+  document.getElementById('form-editar').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    guardarFormulario();
   });
 
   const botonAprobar = document.getElementById('guardar-y-aprobar');
