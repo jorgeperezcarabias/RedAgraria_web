@@ -1,0 +1,16 @@
+---
+titulo: "El arroz valenciano se paga un 35% por debajo de su coste de producción"
+resumen: "LA UNIÓ denuncia que los primeros contratos de la campaña 2026 se cierran en torno a 0,35 euros por kilo, frente a un coste de producción de 0,54 euros, mientras crecen las importaciones de arroz asiático y de Mercosur."
+fecha: 2026-09-15
+tema: mercado
+---
+
+El sindicato agrario LA UNIÓ de Llauradors i Ramaders denunció el 14 de septiembre que los arroceros valencianos afrontan en la campaña 2026 un precio de venta muy por debajo de lo que les cuesta producir. Según sus cálculos, el coste de producción del arroz se sitúa en 0,54 euros por kilo, mientras que los primeros precios ofrecidos por la industria rondan los 0,35 euros, lo que supone una pérdida de unos 0,19 euros por kilo y un precio un 35% inferior al coste real.
+
+Representantes del sector se reunieron ese mismo lunes con el conseller de Agricultura de la Generalitat Valenciana, Miguel Barrachina, para pedirle que traslade al Gobierno central la petición de exigir a Bruselas que frene las importaciones de arroz de terceros países y active las cláusulas de salvaguarda previstas para este tipo de situaciones. LA UNIÓ advierte de que, de mantenerse estos precios, una parte de los agricultores del entorno de la Albufera podría plantearse dejar de sembrar en próximas campañas, con el riesgo que eso supone para un humedal cuyo equilibrio depende en buena medida del cultivo del arroz.
+
+A la caída de precios en origen se suma la presión de las importaciones. Según datos de la Comisión Europea citados por las organizaciones agrarias, ha crecido de forma notable la entrada de arroz procedente de Camboya, Vietnam, Myanmar y Tailandia, países que cuentan con condiciones de acceso preferente al mercado comunitario, además del procedente de los países de Mercosur. La organización agraria Unión de Uniones ha cifrado en 259 millones de euros el valor de las importaciones comunitarias de cereales desde Camboya en 2025, un 10% más que el año anterior, con el arroz como principal producto de ese flujo, y ha pedido a Bruselas que reconozca la existencia de una perturbación de mercado que permita limitar esas importaciones.
+
+El problema no es exclusivo de la Comunitat Valenciana. Otras organizaciones agrarias vienen alertando desde hace semanas de caídas de precio de hasta el 40% en distintas zonas arroceras del país, en un contexto de subida de costes de producción -combustible, fertilizantes, mano de obra- que agrava el margen ya ajustado de las explotaciones. El sector arrocero español, concentrado sobre todo en el Delta del Ebro, Extremadura, Andalucía y la Comunitat Valenciana, lleva varias campañas reclamando mecanismos de protección frente a los acuerdos comerciales de la UE con terceros países.
+
+<!-- FUENTES: El Periódico (elperiodic.com/unio-denuncia-arroceros-valencianos-afrontan-precio-inferior-actuales-costes-produccion_1092446), COPE Comunidad Valenciana (cope.es/emisoras/comunidad-valenciana/valencia-provincia/valencia/noticias/arroceros-valencianos-alertan-campana-critica-plagas-caida-precios-riesgo-abandono-campos-20260910_3434122.html), Valencia Fruits (valenciafruits.com/arroceros-valencianos-afrontan-precio-inferior-35-costes-produccion), Agronews Castilla y León (agronewscastillayleon.com/arroz-caida-precios-40-bruselas-importaciones) -->
